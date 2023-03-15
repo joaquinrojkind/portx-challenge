@@ -1,4 +1,4 @@
-package com.portx.payment.persistence.model;
+package com.portx.payment.persistence.entity;
 
 import lombok.*;
 
@@ -11,7 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "accounts")
-public class Account {
+public class AccountEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -1,4 +1,4 @@
-package com.portx.payment.persistence.model;
+package com.portx.payment.persistence.entity;
 
 import lombok.*;
 
@@ -11,7 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "payments")
-public class Payment {
+public class PaymentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,20 +26,20 @@ public class Payment {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "originator_user_id", referencedColumnName = "id")
-    private User originator;
+    private UserEntity originator;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "beneficiary_user_id", referencedColumnName = "id")
-    private User beneficiary;
+    private UserEntity beneficiary;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "sender_account_id", referencedColumnName = "id")
-    private Account sender;
+    private AccountEntity sender;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "receiver_account_id", referencedColumnName = "id")
-    private Account receiver;
+    private AccountEntity receiver;
 
     @Column(name = "status", nullable = false)
-    private Status status;
+    private StatusEntity status;
 }

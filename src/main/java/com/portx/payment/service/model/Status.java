@@ -1,4 +1,4 @@
-package com.portx.payment.persistence.model;
+package com.portx.payment.service.model;
 
 public enum Status {
 
