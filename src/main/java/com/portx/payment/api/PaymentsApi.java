@@ -22,7 +22,7 @@ public class PaymentsApi {
     private IdempotencyService idempotencyService;
 
     @PostMapping("/payments")
-    public ResponseEntity acceptPayment(@RequestBody PaymentDto paymentDto, @RequestHeader("Idempotency-Key") String idempotencyKey) {
+    public ResponseEntity acceptPayment(@RequestBody PaymentDto paymentDto, @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
         boolean requestHasIdempotencyKey = StringUtils.isNotBlank(idempotencyKey);
         if (requestHasIdempotencyKey) {

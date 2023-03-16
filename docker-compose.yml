@@ -26,7 +26,7 @@ services:
         "spring.datasource.password" : "$MYSQLDB_ROOT_PASSWORD",
         "spring.datasource.driverClassName" : "com.mysql.jdbc.Driver",
         "spring.jpa.properties.hibernate.dialect" : "org.hibernate.dialect.MySQL5InnoDBDialect",
-        "spring.jpa.hibernate.ddl-auto" : "create-drop"
+        "spring.jpa.hibernate.ddl-auto" : "update"
       }'
     volumes:
       - .m2:/root/.m2
