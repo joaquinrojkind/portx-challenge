@@ -25,13 +25,14 @@ public class PaymentsApi {
     public ResponseEntity acceptPayment(@RequestBody PaymentDto paymentDto, @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
         boolean requestHasIdempotencyKey = StringUtils.isNotBlank(idempotencyKey);
+        try {
         if (requestHasIdempotencyKey) {
             Idempotency idempotency = idempotencyService.getIdempotency(idempotencyKey);
             if (Optional.ofNullable(idempotency).isPresent()) {
                 return ResponseEntity.status(idempotency.getHttpStatus()).build();
             }
         }
-        try {
+
             paymentService.acceptPayment(toPayment(paymentDto));
         } catch (RuntimeException e) {
             if (requestHasIdempotencyKey) {
@@ -63,16 +64,20 @@ public class PaymentsApi {
                 .currency(paymentDto.getCurrency())
                 .amount(paymentDto.getAmount())
                 .originator(User.builder()
+                        .id(paymentDto.getOriginator().getId())
                         .name(paymentDto.getOriginator().getName())
                         .build())
                 .beneficiary(User.builder()
+                        .id(paymentDto.getBeneficiary().getId())
                         .name(paymentDto.getBeneficiary().getName())
                         .build())
                 .sender(Account.builder()
+                        .id(paymentDto.getSender().getId())
                         .accountType(paymentDto.getSender().getAccountType())
                         .accountNumber(paymentDto.getSender().getAccountNumber())
                         .build())
                 .receiver(Account.builder()
+                        .id(paymentDto.getReceiver().getId())
                         .accountType(paymentDto.getReceiver().getAccountType())
                         .accountNumber(paymentDto.getReceiver().getAccountNumber())
                         .build())

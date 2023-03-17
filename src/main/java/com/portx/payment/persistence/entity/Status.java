@@ -1,6 +1,6 @@
 package com.portx.payment.persistence.entity;
 
-public enum StatusEntity {
+public enum Status {
 
     CREATED,
     SENT,

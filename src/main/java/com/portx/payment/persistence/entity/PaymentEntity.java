@@ -41,5 +41,5 @@ public class PaymentEntity {
     private AccountEntity receiver;
 
     @Column(name = "status", nullable = false)
-    private StatusEntity status;
+    private Status status;
 }

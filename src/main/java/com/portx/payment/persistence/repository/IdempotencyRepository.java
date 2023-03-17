@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IdempotencyRepository extends JpaRepository<IdempotencyEntity, Long> {
 
-    IdempotencyEntity findByKey(String key);
+    IdempotencyEntity findByIdempotencyKey(String idempotencyKey);
 }

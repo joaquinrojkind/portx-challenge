@@ -2,51 +2,91 @@ package com.portx.payment.service;
 
 import com.portx.payment.persistence.entity.AccountEntity;
 import com.portx.payment.persistence.entity.PaymentEntity;
-import com.portx.payment.persistence.entity.StatusEntity;
+import com.portx.payment.persistence.entity.Status;
 import com.portx.payment.persistence.entity.UserEntity;
+import com.portx.payment.persistence.repository.AccountRepository;
 import com.portx.payment.persistence.repository.PaymentRepository;
+import com.portx.payment.persistence.repository.UserRepository;
 import com.portx.payment.service.model.Payment;
-import com.portx.payment.service.model.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityNotFoundException;
+import java.util.Objects;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Override
+    @Transactional
     public void acceptPayment(Payment payment) {
+
         paymentRepository.save(toPaymentEntity(payment));
 
         // publish event to Kafka
     }
 
     @Override
-    public Status checkPaymentStatus(Long paymentId) {
-        return Status.valueOf(paymentRepository.getOne(paymentId).getStatus().name());
+    public com.portx.payment.service.model.Status checkPaymentStatus(Long paymentId) {
+        return com.portx.payment.service.model.Status.valueOf(
+                paymentRepository.findById(paymentId).orElseThrow(() -> new EntityNotFoundException())
+                        .getStatus().name());
     }
 
     private PaymentEntity toPaymentEntity(Payment payment) {
+
+        UserEntity originator;
+        UserEntity beneficiary;
+        AccountEntity sender;
+        AccountEntity receiver;
+
+        if (Objects.nonNull(payment.getOriginator().getId())) {
+            originator = userRepository.getOne(payment.getOriginator().getId());
+        } else {
+            originator = UserEntity.builder()
+                    .name(payment.getOriginator().getName())
+                    .build();
+        }
+        if (Objects.nonNull(payment.getBeneficiary().getId())) {
+            beneficiary = userRepository.getOne(payment.getBeneficiary().getId());
+        } else {
+            beneficiary = UserEntity.builder()
+                    .name(payment.getBeneficiary().getName())
+                    .build();
+        }
+        if (Objects.nonNull(payment.getSender().getId())) {
+            sender = accountRepository.getOne(payment.getSender().getId());
+        } else {
+            sender = AccountEntity.builder()
+                    .accountType(payment.getSender().getAccountType())
+                    .accountNumber(payment.getSender().getAccountNumber())
+                    .build();
+        }
+        if (Objects.nonNull(payment.getReceiver().getId())) {
+            receiver = accountRepository.getOne(payment.getReceiver().getId());
+        } else {
+            receiver = AccountEntity.builder()
+                    .accountType(payment.getReceiver().getAccountType())
+                    .accountNumber(payment.getReceiver().getAccountNumber())
+                    .build();
+        }
+
         return PaymentEntity.builder()
                 .currency(payment.getCurrency())
                 .amount(payment.getAmount())
-                .originator(UserEntity.builder()
-                        .name(payment.getOriginator().getName())
-                        .build())
-                .beneficiary(UserEntity.builder()
-                        .name(payment.getBeneficiary().getName())
-                        .build())
-                .sender(AccountEntity.builder()
-                        .accountType(payment.getSender().getAccountType())
-                        .accountNumber(payment.getSender().getAccountNumber())
-                        .build())
-                .receiver(AccountEntity.builder()
-                        .accountType(payment.getReceiver().getAccountType())
-                        .accountNumber(payment.getReceiver().getAccountNumber())
-                        .build())
-                .status(StatusEntity.CREATED)
+                .originator(originator)
+                .beneficiary(beneficiary)
+                .sender(sender)
+                .receiver(receiver)
+                .status(Status.CREATED)
                 .build();
     }
 }
