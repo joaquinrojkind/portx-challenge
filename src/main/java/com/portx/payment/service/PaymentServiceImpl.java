@@ -1,5 +1,8 @@
 package com.portx.payment.service;
 
+import com.google.gson.Gson;
+import com.portx.payment.messaging.KafkaService;
+import com.portx.payment.messaging.KafkaTopic;
 import com.portx.payment.persistence.entity.AccountEntity;
 import com.portx.payment.persistence.entity.PaymentEntity;
 import com.portx.payment.persistence.entity.Status;
@@ -24,14 +27,15 @@ public class PaymentServiceImpl implements PaymentService {
     private UserRepository userRepository;
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private KafkaService kafkaService;
 
     @Override
     @Transactional
     public void acceptPayment(Payment payment) {
-
-        paymentRepository.save(toPaymentEntity(payment));
-
-        // publish event to Kafka
+        PaymentEntity savedPayment = paymentRepository.save(toPaymentEntity(payment));
+        String message = new Gson().toJson(savedPayment);
+        kafkaService.publishEvent(KafkaTopic.TRANSACTION_CREATED.getValue(), message);
     }
 
     @Override

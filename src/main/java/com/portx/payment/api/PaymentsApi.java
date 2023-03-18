@@ -1,9 +1,13 @@
 package com.portx.payment.api;
 
 import com.portx.payment.api.dto.PaymentDto;
+import com.portx.payment.api.dto.PaymentStatusResponseDto;
 import com.portx.payment.service.IdempotencyService;
 import com.portx.payment.service.PaymentService;
-import com.portx.payment.service.model.*;
+import com.portx.payment.service.model.Account;
+import com.portx.payment.service.model.Idempotency;
+import com.portx.payment.service.model.Payment;
+import com.portx.payment.service.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,14 +29,13 @@ public class PaymentsApi {
     public ResponseEntity acceptPayment(@RequestBody PaymentDto paymentDto, @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
         boolean requestHasIdempotencyKey = StringUtils.isNotBlank(idempotencyKey);
-        try {
         if (requestHasIdempotencyKey) {
             Idempotency idempotency = idempotencyService.getIdempotency(idempotencyKey);
             if (Optional.ofNullable(idempotency).isPresent()) {
                 return ResponseEntity.status(idempotency.getHttpStatus()).build();
             }
         }
-
+        try {
             paymentService.acceptPayment(toPayment(paymentDto));
         } catch (RuntimeException e) {
             if (requestHasIdempotencyKey) {
@@ -48,9 +51,12 @@ public class PaymentsApi {
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping("/status")
-    public ResponseEntity<Status> checkPaymentStatus(@PathVariable() Long paymentId) {
-        return ResponseEntity.ok(paymentService.checkPaymentStatus(paymentId));
+    @GetMapping("/payments/{id}/status")
+    public ResponseEntity<PaymentStatusResponseDto> checkPaymentStatus(@PathVariable("id") Long paymentId) {
+        return ResponseEntity.ok(
+                PaymentStatusResponseDto.builder()
+                        .status(paymentService.checkPaymentStatus(paymentId))
+                        .build());
     }
 
     private Idempotency buildIdempotency(String key, Integer httpStatus) {
