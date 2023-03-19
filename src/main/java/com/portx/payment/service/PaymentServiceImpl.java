@@ -30,6 +30,12 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private KafkaService kafkaService;
 
+    /**
+     * The transactional annotation ensures that nothing will be committed to the database until
+     * the method returns successfully. Otherwise, it will rollback the transaction. This should
+     * take care of some of the possible failure scenarios although not all of them. More details
+     * on this can be found in the README file of the project.
+     */
     @Override
     @Transactional
     public void acceptPayment(Payment payment) {
@@ -45,6 +51,11 @@ public class PaymentServiceImpl implements PaymentService {
                         .getStatus().name());
     }
 
+    /**
+     * This method will check for ids in the composed entities within a payment structure (Account, User),
+     * meaning that if the client sent ids of existing entities, rather than creating a new entity
+     * the method will leverage the existing one and attach it to the payment that will be created.
+     */
     private PaymentEntity toPaymentEntity(Payment payment) {
 
         UserEntity originator;

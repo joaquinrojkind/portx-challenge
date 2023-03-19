@@ -51,6 +51,11 @@ public class PaymentsApi {
         return ResponseEntity.accepted().build();
     }
 
+    /**
+     * Payment id is currently the database id. In order not to expose the db id we could add an alphanumeric
+     * uuid field to the relevant entities. For CRUD operations which return the entity such as GET we could
+     * return the uuid of the existing entity facing the API.
+     */
     @GetMapping("/payments/{id}/status")
     public ResponseEntity<PaymentStatusResponseDto> checkPaymentStatus(@PathVariable("id") Long paymentId) {
         return ResponseEntity.ok(
@@ -59,6 +64,10 @@ public class PaymentsApi {
                         .build());
     }
 
+    /**
+     * For now, we store the http status only. In the future, for operations that return an entity we
+     * might store that as well.
+     */
     private Idempotency buildIdempotency(String key, Integer httpStatus) {
         return Idempotency.builder()
                 .key(key)

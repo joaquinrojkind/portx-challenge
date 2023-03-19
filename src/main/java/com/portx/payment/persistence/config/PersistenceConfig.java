@@ -1,4 +1,4 @@
-package com.portx.payment.persistence.repository;
+package com.portx.payment.persistence.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
