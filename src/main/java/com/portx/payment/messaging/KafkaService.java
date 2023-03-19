@@ -21,11 +21,14 @@ public class KafkaService {
         properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
-
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, value);
-        producer.send(producerRecord);
-        producer.flush();
-        producer.close();
+        KafkaProducer<String, String> producer = null;
+        try {
+            producer = new KafkaProducer<>(properties);
+            ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, value);
+            producer.send(producerRecord);
+            producer.flush();
+        } finally {
+            producer.close();
+        }
     }
 }
