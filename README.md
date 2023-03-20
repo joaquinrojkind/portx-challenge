@@ -124,7 +124,7 @@ This will run the tests and will print the results to the console.
 
 I would most definitely add integration tests to test the API, but it would require quite some more time so I decided to leave it as a TODO item and share the conceptual approach in here.
 
-The idea is that the integration tests would leverage the application context with a test profile so that we would be testing the actual API. 
+The idea is that the integration tests would leverage the application context with a test profile (this can be achieved with SpringBoot) so that we would be testing the actual API (unit testing an API makes no sense to me). 
 
 The database could be replaced by an in memory database and a migration script to create the tables, all of this automated. 
 
@@ -136,7 +136,21 @@ The main purpose of the testing however is to verify the behaviour of the API en
 
 1) Our sales team tells us that some of the customers will be sending around 1 million payments per day, mostly during business hours, and that they will perform around 10 million queries per day. Which steps will you take to make sure the application can handle this load?
 
-
+It seems to me that the basic approach would be to scale the whole infrastructure horizontally (assuming a Kubernetes cluster or similar), which means adding replicas or nodes of the server-side applications, the messaging brokers and probably the database as well.
 
 2) How does your system guarantee that when accepting a payment the payment is saved locally and the message is sent to the topic? What would happen if a container running the application is restarted after saving the payment to the DB and before sending the message to the topic?
 
+By the use of Spring's transactional annotation on the method that executes the database query followed by the message publishing, we can handle a few situations, although not all of them. 
+
+The transaction will not be committed to the database until the executing method completes successfully. Otherwise, there will be a roll-back.
+
+I can picture a few scenarios to begin with:
+
+- Db query ok -> exception [Kafka not reached] = OK (Nothing will be saved or published)
+- Db query ok -> pod down  [Kafka not reached] = OK (Nothing will be saved or published)
+- Db query ok -> Kafka exception = OK (Nothing will be saved or published)
+- Db query ok -> Kafka ok -> pod down before commit = <b>NOT OK</b> (event published but not saved to Db, rather unlikely scenario though)
+
+Possible solutions that have been suggested include an auxiliary table in the database to keep track of the events. The publishing would somehow be detached from the active thread and a separate job or listener or something would take care to have the events published.
+
+In this case the transaction spans both queries to the database and if anything fails nothing will be saved nor published. So it's a real <i>all or nothing</i>, and it's a way of synchronizing database and kafka transactions.
