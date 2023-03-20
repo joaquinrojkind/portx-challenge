@@ -21,6 +21,9 @@ public class IdempotencyEntity {
     @Column(name = "idempotency_key", nullable = false, unique = true)
     private String idempotencyKey;
 
-    @Column(name = "httpStatus", nullable = false)
+    @Column(name = "httpStatus", nullable = false, length = 10)
     private Integer httpStatus;
+
+    @Column(name = "jsonBody", columnDefinition = "TEXT")
+    private String jsonBody;
 }

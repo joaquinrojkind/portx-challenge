@@ -38,10 +38,11 @@ public class PaymentServiceImpl implements PaymentService {
      */
     @Override
     @Transactional
-    public void acceptPayment(Payment payment) {
+    public Long acceptPayment(Payment payment) {
         PaymentEntity savedPayment = paymentRepository.save(toPaymentEntity(payment));
         String message = new Gson().toJson(savedPayment);
         kafkaService.publishEvent(KafkaTopic.TRANSACTION_CREATED.getValue(), message);
+        return savedPayment.getId();
     }
 
     @Override

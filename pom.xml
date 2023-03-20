@@ -74,8 +74,7 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.12.19</version>
-            <scope>test</scope>
+            <version>1.12.19</version> <!-- scope cannot be test cause it is needed at runtime by db integration -->
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>

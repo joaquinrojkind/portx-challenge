@@ -18,6 +18,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         idempotencyRepository.save(IdempotencyEntity.builder()
                 .idempotencyKey(idempotency.getKey())
                 .httpStatus(idempotency.getHttpStatus())
+                .jsonBody(idempotency.getJsonBody())
                 .build());
     }
 
@@ -34,6 +35,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         return Idempotency.builder()
                 .key(idempotencyEntity.getIdempotencyKey())
                 .httpStatus(idempotencyEntity.getHttpStatus())
+                .jsonBody(idempotencyEntity.getJsonBody())
                 .build();
     }
 }

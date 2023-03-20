@@ -1,5 +1,7 @@
 package com.portx.payment.api;
 
+import com.google.gson.Gson;
+import com.portx.payment.api.dto.AcceptPaymentResponseDto;
 import com.portx.payment.api.dto.PaymentDto;
 import com.portx.payment.api.dto.PaymentStatusResponseDto;
 import com.portx.payment.service.IdempotencyService;
@@ -26,29 +28,37 @@ public class PaymentsApi {
     private IdempotencyService idempotencyService;
 
     @PostMapping("/payments")
-    public ResponseEntity acceptPayment(@RequestBody PaymentDto paymentDto, @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
-
+    public ResponseEntity<AcceptPaymentResponseDto> acceptPayment(@RequestBody PaymentDto paymentDto, @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
+        Gson gson = new Gson();
         boolean requestHasIdempotencyKey = StringUtils.isNotBlank(idempotencyKey);
         if (requestHasIdempotencyKey) {
             Idempotency idempotency = idempotencyService.getIdempotency(idempotencyKey);
             if (Optional.ofNullable(idempotency).isPresent()) {
-                return ResponseEntity.status(idempotency.getHttpStatus()).build();
+                    AcceptPaymentResponseDto response = StringUtils.isNotBlank(idempotency.getJsonBody()) ?
+                            gson.fromJson(idempotency.getJsonBody(), AcceptPaymentResponseDto.class) :
+                            null;
+                    return ResponseEntity.status(idempotency.getHttpStatus()).body(response);
             }
         }
+        Long paymentId;
         try {
-            paymentService.acceptPayment(toPayment(paymentDto));
+            paymentId = paymentService.acceptPayment(toPayment(paymentDto));
         } catch (RuntimeException e) {
             if (requestHasIdempotencyKey) {
                 idempotencyService.storeIdempotency(
-                        buildIdempotency(idempotencyKey, HttpStatus.INTERNAL_SERVER_ERROR.value()));
+                        buildIdempotency(idempotencyKey, HttpStatus.INTERNAL_SERVER_ERROR.value(), null));
             }
             throw e;
         }
+        AcceptPaymentResponseDto response = AcceptPaymentResponseDto.builder()
+                .id(paymentId)
+                .location(String.format("payments_api/payments/%s/status", paymentId))
+                .build();
         if (requestHasIdempotencyKey) {
             idempotencyService.storeIdempotency(
-                    buildIdempotency(idempotencyKey, HttpStatus.ACCEPTED.value()));
+                    buildIdempotency(idempotencyKey, HttpStatus.ACCEPTED.value(), gson.toJson(response)));
         }
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.accepted().body(response);
     }
 
     /**
@@ -64,14 +74,11 @@ public class PaymentsApi {
                         .build());
     }
 
-    /**
-     * For now, we store the http status only. In the future, for operations that return an entity we
-     * might store that as well.
-     */
-    private Idempotency buildIdempotency(String key, Integer httpStatus) {
+    private Idempotency buildIdempotency(String key, Integer httpStatus, String jsonBody) {
         return Idempotency.builder()
                 .key(key)
                 .httpStatus(httpStatus)
+                .jsonBody(jsonBody)
                 .build();
     }
     private Payment toPayment(PaymentDto paymentDto) {

@@ -9,4 +9,5 @@ public class Idempotency {
 
     private String key;
     private Integer httpStatus;
+    private String jsonBody;
 }

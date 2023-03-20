@@ -18,9 +18,9 @@ public class AccountEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "account_type", nullable = false)
+    @Column(name = "account_type", nullable = false, length = 30)
     private String accountType;
 
-    @Column(name = "account_number", nullable = false, unique = true)
+    @Column(name = "account_number", nullable = false, unique = true, length = 30)
     private String accountNumber;
 }

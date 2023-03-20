@@ -121,7 +121,8 @@ public class PaymentServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(savedPayment);
 
         // invoke the method under test passing the appropriate payment object
-        paymentService.acceptPayment(incomingPayment);
+        Long id = paymentService.acceptPayment(incomingPayment);
+        assertThat(id).isEqualTo(savedPayment.getId());
 
         // Capture the payment entity that was passed to the repository
         ArgumentCaptor<PaymentEntity> paymentEntityCaptor = ArgumentCaptor.forClass(PaymentEntity.class);
@@ -239,7 +240,8 @@ public class PaymentServiceImplTest {
         when(paymentRepository.save(any())).thenReturn(savedPayment);
 
         // invoke the method under test passing the appropriate payment object
-        paymentService.acceptPayment(incomingPayment);
+        Long id = paymentService.acceptPayment(incomingPayment);
+        assertThat(id).isEqualTo(savedPayment.getId());
 
         // Capture the payment entity that was passed to the repository
         ArgumentCaptor<PaymentEntity> paymentEntityCaptor = ArgumentCaptor.forClass(PaymentEntity.class);
