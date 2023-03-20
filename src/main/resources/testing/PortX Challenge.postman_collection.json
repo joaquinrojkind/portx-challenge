@@ -1,0 +1,67 @@
+{
+	"info": {
+		"_postman_id": "04d8332e-3371-487e-ab0d-e1a68d657711",
+		"name": "PortX Challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20838739"
+	},
+	"item": [
+		{
+			"name": "Create Payment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Idempotency-Key",
+						"value": "fh874h82f92jf98j2j8f9",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"currency\":\"USD\",\n    \"amount\": 1600,\n    \"originator\": {\n        \"name\": \"William Smith\"\n    },\n    \"beneficiary\": {\n        \"name\": \"Alfonso Olmos\"\n    },\n    \"sender\": {\n        \"accountType\": \"savings\",\n        \"accountNumber\": \"75833465\"\n    },\n        \"receiver\": {\n        \"accountType\": \"checking\",\n        \"accountNumber\": \"89826654\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/payments_api/payments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payments_api",
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/payments_api/payments/10101010/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payments_api",
+						"payments",
+						"10101010",
+						"status"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
