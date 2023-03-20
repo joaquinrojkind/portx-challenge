@@ -63,7 +63,7 @@ Here's an example:
 `mvn spring-boot:run -Dspring-boot.run.arguments="paymentRequestCount=5"`
 
 Once the client application is started it will execute the requests and shut down.
-Check the logs in the terminal to preview all the relevant info about each request, such as request body, response status, response body, etc.
+Check the logs in the terminal to review all the relevant info about each request, such as request body, response status, response body, etc.
 
 ## Verify the database
 
@@ -151,6 +151,6 @@ I can picture a few scenarios to begin with:
 - Db query ok -> Kafka exception = OK (Nothing will be saved or published)
 - Db query ok -> Kafka ok -> pod down before commit = <b>NOT OK</b> (event published but not saved to Db, rather unlikely scenario though)
 
-Possible solutions that have been suggested include an auxiliary table in the database to keep track of the events. The publishing would somehow be detached from the active thread and a separate job or listener or something would take care to have the events published.
+Possible solutions that have been suggested include an auxiliary table in the database to keep track of the events. The publishing would somehow be detached from the active thread and a separate job or listener or something would take care to have the events published, including the management of retries or whatever needed.
 
 In this case the transaction spans both queries to the database and if anything fails nothing will be saved nor published. So it's a real <i>all or nothing</i>, and it's a way of synchronizing database and kafka transactions.
